@@ -1,0 +1,145 @@
+-- Daily KPI per Store
+SELECT store_id,
+	date,
+	sales,
+	ROUND((transactions::NUMERIC/ NULLIF (traffic_count,0))*100,2) AS conversion_rate,
+	ROUND(sales::NUMERIC/ NULLIF (transactions, 0), 2) AS avg_transaction_value,
+	ROUND(units_sold::NUMERIC/ NULLIF(transactions,0), 2) AS unit_per_transaction,
+	ROUND(sales::NUMERIC/ NULLIF (staff_hours,0)::NUMERIC,2) AS productivity,
+	ROUND(sales::NUMERIC/ NULLIF(sales_goal,0)::NUMERIC *100,2) AS actual_vs_goal,
+	ROUND((crm_signups::NUMERIC/ NULLIF(transactions,0))*100,2) AS crm_rate
+FROM retail_sales
+ORDER BY store_id,date
+
+-- Weekly KPI per Store
+WITH weekly_sales AS(
+SELECT 
+	store_id,
+	DATE_TRUNC('week',date) AS weekly,
+	ROUND(SUM(sales)) AS sales,
+	ROUND(SUM(transactions)::NUMERIC/ NULLIF(SUM(traffic_count),0)*100,2) AS conversion_rate,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(transactions), 0), 2) AS avg_transaction_value,
+	ROUND(SUM(units_sold)::NUMERIC/ NULLIF(SUM(transactions),0), 2) AS unit_per_transaction,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(staff_hours),0)::NUMERIC,2) AS productivity,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(sales_goal),0)::NUMERIC *100,2) AS actual_vs_goal,
+	ROUND(SUM(crm_signups)::NUMERIC/ NULLIF(SUM(transactions),0)*100,2) AS crm_rate
+FROM retail_sales
+GROUP BY store_id,DATE_TRUNC('week',date)
+),
+ranked_weeks AS (
+  SELECT *,
+    DENSE_RANK() OVER (PARTITION BY store_id ORDER BY weekly) AS week_number
+  FROM weekly_sales
+)
+SELECT 
+  store_id,
+  weekly,
+  'Week' || week_number AS week_label,
+  sales,
+  conversion_rate,
+  avg_transaction_value,
+  unit_per_transaction,
+  productivity,
+  actual_vs_goal,
+  crm_rate
+FROM ranked_weeks
+ORDER BY store_id, weekly;
+
+-- Monthly KPI per Store
+WITH monthly_sales AS(
+SELECT 
+	store_id,
+	DATE_TRUNC('month',date) AS monthly,
+	ROUND(SUM(sales)) AS sales,
+	ROUND(SUM(transactions)::NUMERIC/ NULLIF(SUM(traffic_count),0)*100,2) AS conversion_rate,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(transactions), 0), 2) AS avg_transaction_value,
+	ROUND(SUM(units_sold)::NUMERIC/ NULLIF(SUM(transactions),0), 2) AS unit_per_transaction,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(staff_hours),0)::NUMERIC,2) AS productivity,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(sales_goal),0)::NUMERIC *100,2) AS actual_vs_goal,
+	ROUND(SUM(crm_signups)::NUMERIC/ NULLIF(SUM(transactions),0)*100,2) AS crm_rate
+FROM retail_sales
+GROUP BY store_id,DATE_TRUNC('month',date)
+),
+ranked_months AS (
+  SELECT *,
+    DENSE_RANK() OVER (PARTITION BY store_id ORDER BY monthly) AS month_number,
+	TO_CHAR(monthly, 'Month') AS month_name
+  FROM monthly_sales
+)
+SELECT 
+  store_id,
+  monthly,
+  TRIM(month_name) AS month_label,
+  sales,
+  conversion_rate,
+  avg_transaction_value,
+  unit_per_transaction,
+  productivity,
+  actual_vs_goal,
+  crm_rate
+FROM ranked_months
+ORDER BY store_id, monthly;
+
+
+--Quarterly KPI per Store
+WITH quarterly_sales AS(
+SELECT 
+	store_id,
+	DATE_TRUNC('quarter',date) AS quarterly,
+	ROUND(SUM(sales)) AS sales,
+	ROUND(SUM(transactions)::NUMERIC/ NULLIF(SUM(traffic_count),0)*100,2) AS conversion_rate,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(transactions), 0), 2) AS avg_transaction_value,
+	ROUND(SUM(units_sold)::NUMERIC/ NULLIF(SUM(transactions),0), 2) AS unit_per_transaction,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(staff_hours),0)::NUMERIC,2) AS productivity,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(sales_goal),0)::NUMERIC *100,2) AS actual_vs_goal,
+	ROUND(SUM(crm_signups)::NUMERIC/ NULLIF(SUM(transactions),0)*100,2) AS crm_rate
+FROM retail_sales
+GROUP BY store_id,DATE_TRUNC('quarter',date)
+),
+ranked_quarters AS (
+  SELECT *,
+    DENSE_RANK() OVER (PARTITION BY store_id ORDER BY quarterly) AS quarter_number
+  FROM quarterly_sales
+)
+SELECT 
+  store_id,
+  quarterly,
+  'Q' || quarter_number AS quarter_label,
+  sales,
+  conversion_rate,
+  avg_transaction_value,
+  unit_per_transaction,
+  productivity,
+  actual_vs_goal,
+  crm_rate
+FROM ranked_quarters
+ORDER BY store_id, quarterly;
+
+--Yearly KPI per Store
+WITH yearly_sales AS(
+SELECT 
+	store_id,
+	DATE_TRUNC('year',date) AS yearly,
+	ROUND(SUM(sales)) AS sales,
+	ROUND(SUM(transactions)::NUMERIC/ NULLIF(SUM(traffic_count),0)*100,2) AS conversion_rate,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(transactions), 0), 2) AS avg_transaction_value,
+	ROUND(SUM(units_sold)::NUMERIC/ NULLIF(SUM(transactions),0), 2) AS unit_per_transaction,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(staff_hours),0)::NUMERIC,2) AS productivity,
+	ROUND(SUM(sales)::NUMERIC/ NULLIF(SUM(sales_goal),0)::NUMERIC *100,2) AS actual_vs_goal,
+	ROUND(SUM(crm_signups)::NUMERIC/ NULLIF(SUM(transactions),0)*100,2) AS crm_rate
+FROM retail_sales
+GROUP BY store_id,DATE_TRUNC('year',date)
+)
+SELECT 
+  store_id,
+  yearly,
+  EXTRACT(YEAR FROM yearly)::INT AS year_number,
+  sales,
+  conversion_rate,
+  avg_transaction_value,
+  unit_per_transaction,
+  productivity,
+  actual_vs_goal,
+  crm_rate
+FROM yearly_sales
+ORDER BY store_id, yearly;
