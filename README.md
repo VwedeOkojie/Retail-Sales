@@ -6,7 +6,7 @@ Three months of daily data (May to July 2025) for 4 stores. I calculated the cor
 
 ![Store KPI dashboard](<Store KPI dashboard.png>)
 
-📥 **[Download the Power BI file](retail_kpis.pbix)** · **[See the SQL](kpis.sql)**
+📥 **[Download the Power BI file](retail-sales.pbix)** · **[See the SQL](kpis.sql)**
 
 ## Key findings
 
