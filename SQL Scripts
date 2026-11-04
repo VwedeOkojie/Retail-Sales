@@ -9,7 +9,7 @@ SELECT store_id,
 	ROUND(sales::NUMERIC/ NULLIF(sales_goal,0)::NUMERIC *100,2) AS actual_vs_goal,
 	ROUND((crm_signups::NUMERIC/ NULLIF(transactions,0))*100,2) AS crm_rate
 FROM retail_sales
-ORDER BY store_id,date
+ORDER BY store_id,date;
 
 -- Weekly KPI per Store
 WITH weekly_sales AS(
@@ -82,7 +82,7 @@ ORDER BY store_id, monthly;
 
 
 --Quarterly KPI per Store
---Quarterly KPI per Store
+-- The label comes from the calendar (EXTRACT), so May-June reads Q2 2025 and July reads Q3 2025
 WITH quarterly_sales AS(
 SELECT 
 	store_id,
@@ -110,7 +110,6 @@ SELECT
   crm_rate
 FROM quarterly_sales
 ORDER BY store_id, quarterly;
-
 
 --Yearly KPI per Store
 WITH yearly_sales AS(
