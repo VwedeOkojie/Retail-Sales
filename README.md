@@ -4,7 +4,7 @@
 
 Three months of daily data (May to July 2025) for 4 stores. I calculated the core store KPIs in PostgreSQL, by day, week, month, quarter and year, and built a one-page Power BI dashboard to show where each store stands against its goal.
 
-![Store KPI dashboard](images/dashboard.png)
+![Store KPI dashboard](Store KPI dashboard.png)
 
 📥 **[Download the Power BI file](retail_kpis.pbix)** · **[See the SQL](kpis.sql)**
 
