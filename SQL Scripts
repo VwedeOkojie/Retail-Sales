@@ -82,6 +82,7 @@ ORDER BY store_id, monthly;
 
 
 --Quarterly KPI per Store
+--Quarterly KPI per Store
 WITH quarterly_sales AS(
 SELECT 
 	store_id,
@@ -95,16 +96,11 @@ SELECT
 	ROUND(SUM(crm_signups)::NUMERIC/ NULLIF(SUM(transactions),0)*100,2) AS crm_rate
 FROM retail_sales
 GROUP BY store_id,DATE_TRUNC('quarter',date)
-),
-ranked_quarters AS (
-  SELECT *,
-    DENSE_RANK() OVER (PARTITION BY store_id ORDER BY quarterly) AS quarter_number
-  FROM quarterly_sales
 )
 SELECT 
   store_id,
   quarterly,
-  'Q' || quarter_number AS quarter_label,
+  'Q' || EXTRACT(QUARTER FROM quarterly) || ' ' || EXTRACT(YEAR FROM quarterly) AS quarter_label,
   sales,
   conversion_rate,
   avg_transaction_value,
@@ -112,8 +108,9 @@ SELECT
   productivity,
   actual_vs_goal,
   crm_rate
-FROM ranked_quarters
+FROM quarterly_sales
 ORDER BY store_id, quarterly;
+
 
 --Yearly KPI per Store
 WITH yearly_sales AS(
